@@ -8,6 +8,13 @@ A new Go-language client library for accessing the Robinhood API. Based on https
 
 ![Roho logo](images/roho.png?raw=true "Roho")
 
+## Features
+
+* Idiomatic Go API
+* Buying & selling shares and cryptocurrencies
+* Access to historical quotes
+* Designed for use by trading bots
+
 ## Usage
 
 ```go
