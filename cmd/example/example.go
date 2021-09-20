@@ -22,13 +22,13 @@ func main() {
 	}
 
 	ctx := context.Background()
-	c, err := roho.New(ctx, &roho.Config{Username: user, Password: pass})
+	r, err := roho.New(ctx, &roho.Config{Username: user, Password: pass})
 	if err != nil {
 		log.Fatalf("new failed: %v", err)
 	}
 
 	log.Printf("Getting portfolios ...")
-	ps, err := c.Portfolios(ctx)
+	ps, err := r.Portfolios(ctx)
 	if err != nil {
 		log.Fatalf("get portfolios failed: %v", err)
 	}
@@ -39,27 +39,27 @@ func main() {
 
 	sym := "SPY"
 	log.Printf("Looking up %s ...", sym)
-	i, err := c.Lookup(ctx, sym)
+	i, err := r.Lookup(ctx, sym)
 	if err != nil {
 		log.Fatalf("get instrument failed: %v", err)
 	}
 	log.Printf("SPY is %s", i.Name)
 
-	fs, err := c.Fundamentals(ctx, sym)
+	fs, err := r.Fundamentals(ctx, sym)
 	if err != nil {
 		log.Fatalf("get fundamentals failed: %v", err)
 	}
 	log.Printf("SPY opening price was $%.2f (52 week high: $%.2f)", fs[0].Open, fs[0].High52Weeks)
 
-	/*	hs, err := c.Historicals(ctx, "5minute", "week", sym)
-		if err != nil {
-			log.Fatalf("get historicals failed: %v", err)
-		}
-		for _, r := range hs[0].Records {
-			log.Printf("  %s: opened at %.2f, closed at %.2f", r.BeginsAt, r.OpenPrice, r.ClosePrice)
-		}
-	*/
-	qs, err := c.Quote(ctx, "SPY")
+	hs, err := r.Historicals(ctx, "day", "week", sym)
+	if err != nil {
+		log.Fatalf("get historicals failed: %v", err)
+	}
+	for _, r := range hs[0].Records {
+		log.Printf("  %s: opened at %.2f, closed at %.2f", r.BeginsAt, r.OpenPrice, r.ClosePrice)
+	}
+
+	qs, err := r.Quote(ctx, "SPY")
 	if err != nil {
 		log.Fatalf("get quote failed: %v", err)
 	}
@@ -72,7 +72,7 @@ func main() {
 	switch os.Args[1] {
 	case "buy":
 		log.Printf("Buying 1 share of %s ...", i.Symbol)
-		o, err := c.Buy(ctx, i, roho.OrderOpts{
+		o, err := r.Buy(ctx, i, roho.OrderOpts{
 			Price:    1.0,
 			Quantity: 1,
 		})
@@ -89,7 +89,7 @@ func main() {
 		}
 	case "sell":
 		log.Printf("Selling 1 share of %s ...", i.Symbol)
-		_, err := c.Sell(ctx, i, roho.OrderOpts{
+		_, err := r.Sell(ctx, i, roho.OrderOpts{
 			Price:    1.0,
 			Quantity: 1,
 		})
