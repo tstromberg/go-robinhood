@@ -22,7 +22,7 @@ func cryptoURL(s string) string {
 // call retrieves from the endpoint and unmarshals resulting json into
 // the provided destination interface, which must be a pointer.
 func (c *Client) get(ctx context.Context, url string, dest interface{}) error {
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		return err
 	}
@@ -30,7 +30,7 @@ func (c *Client) get(ctx context.Context, url string, dest interface{}) error {
 	return c.call(ctx, req, dest)
 }
 
-// ErrorMap encapsulates the helpful error messages returned by the API server
+// ErrorMap encapsulates the helpful error messages returned by the API server.
 type ErrorMap map[string]interface{}
 
 func (e ErrorMap) Error() string {
