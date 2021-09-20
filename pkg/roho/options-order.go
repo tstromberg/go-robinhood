@@ -87,7 +87,7 @@ func (c *Client) OrderOptions(ctx context.Context, q *OptionInstrument, o Option
 	return out, nil
 }
 
-// GetOptionsOrders returns all outstanding options orders.
+// OptionsOrders returns all outstanding options orders.
 func (c *Client) OptionsOrders(ctx context.Context) (json.RawMessage, error) {
 	var o json.RawMessage
 	err := c.get(ctx, baseURL("options")+"orders/", &o)

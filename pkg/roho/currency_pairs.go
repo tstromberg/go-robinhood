@@ -7,13 +7,13 @@ import (
 )
 
 type CryptoCurrencyPair struct {
-	CyrptoAssetCurrency    AssetCurrency `json:"asset_currency"`
+	AssetCurrency          AssetCurrency `json:"asset_currency"`
 	ID                     string        `json:"id"`
 	MaxOrderSize           float64       `json:"max_order_size,string"`
 	MinOrderPriceIncrement float64       `json:"min_order_price_increment,string"`
 	MinOrderSize           float64       `json:"min_order_size,string"`
 	Name                   string        `json:"name"`
-	CrytoQuoteCurrency     QuoteCurrency `json:"quote_currency"`
+	QuoteCurrency          QuoteCurrency `json:"quote_currency"`
 	Symbol                 string        `json:"symbol"`
 	Tradability            string        `json:"tradability"`
 }
@@ -43,8 +43,7 @@ func (c *Client) CryptoCurrencyPairs(ctx context.Context) ([]CryptoCurrencyPair,
 	return r.Results, err
 }
 
-// CryptoInstrument will take standard crypto symbol and return usable information
-// to place the order.
+// CryptoInstrument will take standard crypto symbol and return usable information to place the order.
 func (c *Client) CryptoInstrument(ctx context.Context, symbol string) (*CryptoCurrencyPair, error) {
 	allPairs, err := c.CryptoCurrencyPairs(ctx)
 	if err != nil {
@@ -52,7 +51,7 @@ func (c *Client) CryptoInstrument(ctx context.Context, symbol string) (*CryptoCu
 	}
 
 	for _, pair := range allPairs {
-		if pair.CyrptoAssetCurrency.Code == symbol {
+		if pair.AssetCurrency.Code == symbol {
 			return &pair, nil
 		}
 	}

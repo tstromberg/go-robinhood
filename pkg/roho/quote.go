@@ -24,7 +24,7 @@ type Quote struct {
 	UpdatedAt                   string  `json:"updated_at"`
 }
 
-// GetQuote returns all the latest stock quotes for the list of stocks provided.
+// Quote returns all the latest stock quotes for the list of stocks provided.
 func (c *Client) Quote(ctx context.Context, stocks ...string) ([]Quote, error) {
 	url := baseURL("quotes") + "?symbols=" + strings.Join(stocks, ",")
 	var r struct{ Results []Quote }

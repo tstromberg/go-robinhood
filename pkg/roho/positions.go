@@ -48,12 +48,12 @@ type LegPosition struct {
 
 type Unknown interface{}
 
-// GetPositions returns all the positions associated with an account.
+// Positions returns all the positions associated with an account.
 func (c *Client) OptionPositions(ctx context.Context) ([]OptionPostion, error) {
 	return c.OptionPositionsParams(ctx, PositionParams{NonZero: true})
 }
 
-// GetPositions returns all the positions associated with an account.
+// Positions returns all the positions associated with an account.
 func (c *Client) Positions(ctx context.Context) ([]Position, error) {
 	return c.PositionsParams(ctx, PositionParams{NonZero: true})
 }
@@ -73,7 +73,7 @@ func (p PositionParams) encode() string {
 	return v.Encode()
 }
 
-// GetPositionsParams returns all the positions associated with a count, but
+// PositionsParams returns all the positions associated with a count, but
 // passes the encoded PositionsParams object along to the RobinHood API as part
 // of the query string.
 func (c *Client) PositionsParams(ctx context.Context, p PositionParams) ([]Position, error) {
@@ -87,7 +87,7 @@ func (c *Client) PositionsParams(ctx context.Context, p PositionParams) ([]Posit
 	return r.Results, c.get(ctx, u.String(), &r)
 }
 
-// GetPositionsParams returns all the positions associated with a count, but
+// PositionsParams returns all the positions associated with a count, but
 // passes the encoded PositionsParams object along to the RobinHood API as part
 // of the query string.
 func (c *Client) OptionPositionsParams(ctx context.Context, p PositionParams) ([]OptionPostion, error) {
