@@ -19,6 +19,12 @@ endif
 
 GOLINT_CONFIG:=$(LINT_ROOT)/.golangci.yml
 
+.PHONY: test-only
+test-only:
+	go test -v ./...
+
+test: lint test-only
+
 lint: out/linters/golangci-lint-$(GOLINT_VERSION)-$(LINT_ARCH)
 	out/linters/golangci-lint-$(GOLINT_VERSION)-$(LINT_ARCH) run
 
