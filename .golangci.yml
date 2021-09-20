@@ -149,11 +149,12 @@ linters:
     - varcheck
     - wastedassign
     - whitespace
+    - gochecknoinits
+#    - tagliatelle
 
   # Disabled linters, due to being misaligned with Go practices
   # - exhaustivestruct
   # - gochecknoglobals
-  # - gochecknoinits
   # - goconst
   # - godox
   # - goerr113

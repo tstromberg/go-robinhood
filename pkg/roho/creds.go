@@ -12,15 +12,6 @@ import (
 	"golang.org/x/oauth2"
 )
 
-var defaultPath = ""
-
-func init() {
-	u, err := user.Current()
-	if err == nil {
-		defaultPath = path.Join(u.HomeDir, ".config", "roho.token")
-	}
-}
-
 // A CredsCacher takes user credentials and a file path. The token obtained
 // from the RobinHood API will be cached at the file path, and a new token will
 // not be obtained.
@@ -34,14 +25,19 @@ type CredsCacher struct {
 // when retrieving their token.
 func (c *CredsCacher) Token() (*oauth2.Token, error) {
 	if c.Path == "" {
-		c.Path = defaultPath
+		u, err := user.Current()
+		if err != nil {
+			return nil, fmt.Errorf("user lookup failed: %w", err)
+		}
+
+		c.Path = path.Join(u.HomeDir, ".config", "roho.token")
 	}
 
 	mustLogin := false
 
-	err := os.MkdirAll(path.Dir(c.Path), 0750)
+	err := os.MkdirAll(path.Dir(c.Path), 0o750)
 	if err != nil {
-		return nil, fmt.Errorf("error creating path for token: %s", err)
+		return nil, fmt.Errorf("error creating path for token: %w", err)
 	}
 
 	_, err = os.Stat(c.Path)
@@ -72,7 +68,7 @@ func (c *CredsCacher) Token() (*oauth2.Token, error) {
 		return nil, err
 	}
 
-	f, err := os.OpenFile(c.Path, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0640)
+	f, err := os.OpenFile(c.Path, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0o640)
 	if err != nil {
 		return nil, err
 	}
