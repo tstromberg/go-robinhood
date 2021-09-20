@@ -12,7 +12,7 @@ A new Go-language client library for accessing the Robinhood API. Based on https
 
 * Idiomatic Go API
 * Buying & selling shares and cryptocurrencies
-* Access to historical quotes
+* Access to historical quotes & crypto positions
 * Designed for use by trading bots
 
 ## Usage
@@ -35,8 +35,6 @@ For a runnable example, see [cmd/example](cmd/example).
 
 ## Approximate 2021 Roadmap
 
-* Clean up codebase
-* Add CI
 * Add 1st-class support for executing pluggable trading strategies
 * Add 1st-class support for backtesting trading strategies
 * Add response caching for offline testing
