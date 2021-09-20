@@ -45,7 +45,7 @@ func (c *Client) Portfolios(ctx context.Context) ([]Portfolio, error) {
 // GetCryptoPortfolios returns crypto portfolio info
 func (c *Client) CryptoPortfolios(ctx context.Context) (CryptoPortfolio, error) {
 	var p CryptoPortfolio
-	var portfolioURL = cryptoURL("portfolios") + c.CryptoAccount.ID
+	portfolioURL := cryptoURL("portfolios") + c.CryptoAccount.ID
 	err := c.get(ctx, portfolioURL, &p)
 	return p, err
 }
