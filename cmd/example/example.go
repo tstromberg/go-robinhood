@@ -76,7 +76,6 @@ func main() {
 			Price:    1.0,
 			Quantity: 1,
 		})
-
 		if err != nil {
 			log.Fatalf("buy failed: %v", err)
 		}

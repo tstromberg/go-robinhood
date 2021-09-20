@@ -53,16 +53,24 @@ func Dial(ctx context.Context, s oauth2.TokenSource) (*Client, error) {
 	}
 
 	a, err := c.Accounts(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("accounts: %w", err)
+	}
+
 	log.Printf("Found %d accounts", len(a))
 	if len(a) > 0 {
 		c.Account = &a[0]
 	}
 
 	ca, err := c.CryptoAccounts(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("crypto accounts: %w", err)
+	}
+
 	log.Printf("Found %d crypto accounts", len(ca))
 	if len(ca) > 0 {
 		c.CryptoAccount = &ca[0]
 	}
 
-	return c, err
+	return c, nil
 }

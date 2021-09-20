@@ -22,7 +22,7 @@ type Instrument struct {
 	MinTickSize           interface{} `json:"min_tick_size"`
 	Name                  string      `json:"name"`
 	Quote                 string      `json:"quote"`
-	RhsTradability        string      `json:"rhs_tradability"`
+	RHSTRadability        string      `json:"rhs_tradability"`
 	SimpleName            interface{} `json:"simple_name"`
 	Splits                string      `json:"splits"`
 	State                 string      `json:"state"`
@@ -42,7 +42,7 @@ func (i Instrument) OrderSymbol() string {
 	return i.Symbol
 }
 
-// GetInstrument returns an Instrument given a URL
+// GetInstrument returns an Instrument given a URL.
 func (c *Client) Instrument(ctx context.Context, instURL string) (*Instrument, error) {
 	var i Instrument
 	err := c.get(ctx, instURL, &i)
@@ -52,7 +52,7 @@ func (c *Client) Instrument(ctx context.Context, instURL string) (*Instrument, e
 	return &i, err
 }
 
-// Lookup returns an Instrument given a ticker symbol
+// Lookup returns an Instrument given a ticker symbol.
 func (c *Client) Lookup(ctx context.Context, sym string) (*Instrument, error) {
 	var i struct {
 		Results []Instrument
