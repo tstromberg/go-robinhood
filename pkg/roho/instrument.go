@@ -42,7 +42,7 @@ func (i Instrument) OrderSymbol() string {
 	return i.Symbol
 }
 
-// GetInstrument returns an Instrument given a URL.
+// Instrument returns an Instrument given a URL.
 func (c *Client) Instrument(ctx context.Context, instURL string) (*Instrument, error) {
 	var i Instrument
 	err := c.get(ctx, instURL, &i)

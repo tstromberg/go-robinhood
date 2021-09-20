@@ -26,7 +26,7 @@ type HistoricalRecord struct {
 	Interpolated bool      `json:"interpolated"`
 }
 
-// GetHistoricals returns historical data for the list of stocks provided.
+// Historicals returns historical data for the list of stocks provided.
 func (c *Client) Historicals(ctx context.Context, interval string, span string, stocks ...string) ([]Historical, error) {
 	url := fmt.Sprintf("%s?interval=%s&span=%s&symbols=%s", baseURL("quotes/historicals"), interval, span, strings.Join(stocks, ","))
 	var r struct{ Results []Historical }

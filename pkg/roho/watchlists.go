@@ -6,8 +6,7 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-// A Watchlist is a list of stock Instruments that an investor is tracking in
-// his Robinhood portfolio/app.
+// Watchlist is a list of stock Instruments that an investor is tracking on Robinhood.
 type Watchlist struct {
 	Name string `json:"name"`
 	URL  string `json:"url"`
@@ -16,7 +15,7 @@ type Watchlist struct {
 	c *Client
 }
 
-// GetWatchlists retrieves the watchlists for a given set of credentials/accounts.
+// Watchlists retrieves the watchlists for a given set of credentials/accounts.
 func (c *Client) Watchlists(ctx context.Context) ([]Watchlist, error) {
 	var r struct{ Results []Watchlist }
 	err := c.get(ctx, baseURL("watchlists"), &r)
@@ -31,7 +30,7 @@ func (c *Client) Watchlists(ctx context.Context) ([]Watchlist, error) {
 	return r.Results, nil
 }
 
-// GetInstruments returns the list of Instruments associated with a Watchlist.
+// Instruments returns the list of Instruments associated with a Watchlist.
 func (w *Watchlist) Instruments(ctx context.Context) ([]Instrument, error) {
 	var r struct {
 		Results []struct {

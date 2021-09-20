@@ -58,7 +58,7 @@ type MarginBalances struct {
 	UnsettledFunds                    float64 `json:"unsettled_funds,string"`
 }
 
-// GetAccounts returns all the accounts associated with a login/client.
+// Accounts returns all the accounts associated with a login/client.
 func (c *Client) Accounts(ctx context.Context) ([]Account, error) {
 	var r struct{ Results []Account }
 
