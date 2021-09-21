@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// Fundamental represents the JSON struct returned by the Robinhood fundamentals API.
 type Fundamental struct {
 	Open          float64 `json:"open,string"`
 	High          float64 `json:"high,string"`
@@ -20,7 +21,7 @@ type Fundamental struct {
 	Instrument    string  `json:"instrument"`
 }
 
-// GetFundamentals returns fundamental data for the list of stocks provided.
+// Fundamentals returns fundamental data for the list of stocks provided.
 func (c *Client) Fundamentals(ctx context.Context, stocks ...string) ([]Fundamental, error) {
 	url := baseURL("fundamentals") + "?symbols=" + strings.Join(stocks, ",")
 	var r struct{ Results []Fundamental }

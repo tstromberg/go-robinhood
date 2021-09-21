@@ -98,7 +98,7 @@ func (p *Pager) Next(ctx context.Context, c *Client, out interface{}) error {
 	return c.get(ctx, p.NextURL, out)
 }
 
-// GetInstrument returns a list of option-typed instruments given a list of
+// Instrument returns a list of option-typed instruments given a list of
 // expiration dates for a given trade type. The request will continue until the
 // provided context is cancelled. This is done to mimic the way the web UI
 // fetches many, many options instruments repeatedly, since I haven't yet

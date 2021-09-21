@@ -34,7 +34,7 @@ type CryptoPortfolio struct {
 	MarketValue              float64 `json:"market_value,string"`
 }
 
-// GetPortfolios returns all the portfolios associated with a client's
+// Portfolios returns all the portfolios associated with a client's
 // credentials and accounts.
 func (c *Client) Portfolios(ctx context.Context) ([]Portfolio, error) {
 	var p struct{ Results []Portfolio }
@@ -42,7 +42,7 @@ func (c *Client) Portfolios(ctx context.Context) ([]Portfolio, error) {
 	return p.Results, err
 }
 
-// GetCryptoPortfolios returns crypto portfolio info.
+// CryptoPortfolios returns crypto portfolio info.
 func (c *Client) CryptoPortfolios(ctx context.Context) (CryptoPortfolio, error) {
 	var p CryptoPortfolio
 	portfolioURL := cryptoURL("portfolios") + c.CryptoAccount.ID
