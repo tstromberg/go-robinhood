@@ -25,8 +25,8 @@ type Quote struct {
 }
 
 // GetQuote returns all the latest stock quotes for the list of stocks provided.
-func (c *Client) Quote(ctx context.Context, stocks ...string) ([]Quote, error) {
-	url := baseURL("quotes") + "?symbols=" + strings.Join(stocks, ",")
+func (c *Client) Quote(ctx context.Context, symbols ...string) ([]Quote, error) {
+	url := baseURL("quotes") + "?symbols=" + strings.Join(symbols, ",")
 	var r struct{ Results []Quote }
 	err := c.get(ctx, url, &r)
 	return r.Results, err
