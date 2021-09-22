@@ -48,7 +48,7 @@ func (d *Date) UnmarshalJSON(bs []byte) error {
 }
 
 // OptionChains returns options for the given instruments.
-func (c *Client) OptionChains(ctx context.Context, is ...*Instrument) ([]*OptionChain, error) {
+func (c *Client) OptionChains(ctx context.Context, is ...Instrument) ([]*OptionChain, error) {
 	s := []string{}
 	for _, inst := range is {
 		s = append(s, inst.ID)

@@ -8,17 +8,23 @@ import (
 	"github.com/tstromberg/roho/pkg/roho"
 )
 
+var (
+	LuckySevens = "lucky-sevens"
+	Random      = "random"
+	strategies  = []string{LuckySevens, Random}
+)
+
 type Trade struct {
-	Instrument *roho.Instrument
-	Order      roho.OrderOpts
-	Reason     string
+	Symbol        string
+	InstrumentURL string
+	Order         roho.OrderOpts
+	Reason        string
 }
 
-// Commander is a common interface for executing strategies
-type Commander interface {
-	Trades(context.Context, []string) ([]Trade, error)
-	Symbols(context.Context) ([]string, error)
-	Simulate(context.Context, time.Time) error
+// Strategy is an interface for executing stock strategies
+type Strategy interface {
+	Trades(ctx context.Context, ps []roho.Position, qs []roho.Quote) ([]Trade, error)
+	SetTime(ctx context.Context, t time.Time) error
 	String() string
 }
 
@@ -29,12 +35,20 @@ type Config struct {
 }
 
 // New returns a new strategy manager
-func New(ctx context.Context, c Config) (Commander, error) {
+func New(ctx context.Context, c Config) (Strategy, error) {
 	switch c.Kind {
-	case "lucky-sevens":
-		l := &LuckySevens{c: c}
+	case LuckySevens:
+		l := &LuckySevensStrategy{c: c}
+		return l, nil
+	case Random:
+		l := &RandomStrategy{c: c}
 		return l, nil
 	default:
 		return nil, fmt.Errorf("no strategy named %q exists", c.Kind)
 	}
+}
+
+// List returns a list of strategies
+func List() []string {
+	return strategies
 }

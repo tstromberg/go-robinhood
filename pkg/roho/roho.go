@@ -3,7 +3,6 @@ package roho
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 
@@ -32,7 +31,6 @@ func New(ctx context.Context, c *Config) (*Client, error) {
 		return nil, fmt.Errorf("token: %w", err)
 	}
 
-	log.Printf("Logging into Robinhood as %s ...", user)
 	return Dial(ctx, oauth2.StaticTokenSource(token))
 }
 
@@ -57,7 +55,6 @@ func Dial(ctx context.Context, s oauth2.TokenSource) (*Client, error) {
 		return nil, fmt.Errorf("accounts: %w", err)
 	}
 
-	log.Printf("Found %d accounts", len(a))
 	if len(a) > 0 {
 		c.Account = &a[0]
 	}
@@ -67,7 +64,6 @@ func Dial(ctx context.Context, s oauth2.TokenSource) (*Client, error) {
 		return nil, fmt.Errorf("crypto accounts: %w", err)
 	}
 
-	log.Printf("Found %d crypto accounts", len(ca))
 	if len(ca) > 0 {
 		c.CryptoAccount = &ca[0]
 	}

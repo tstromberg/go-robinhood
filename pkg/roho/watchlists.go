@@ -50,8 +50,8 @@ func (w *Watchlist) Instruments(ctx context.Context) ([]Instrument, error) {
 		// shadow for safe closure access
 		i := i
 		eg.Go(func() error {
-			inst, err := w.c.Lookup(ctx, r.Results[i].Instrument)
-			insts[i] = inst
+			inst, err := w.c.Instrument(ctx, r.Results[i].Instrument)
+			insts[i] = &inst
 			return err
 		})
 	}

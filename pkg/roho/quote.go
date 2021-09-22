@@ -2,6 +2,7 @@ package roho
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/tstromberg/roho/pkg/times"
@@ -24,8 +25,18 @@ type Quote struct {
 	UpdatedAt                   string  `json:"updated_at"`
 }
 
-// Quote returns the latest stock quotes for the list of stocks provided.
-func (c *Client) Quote(ctx context.Context, symbols ...string) ([]Quote, error) {
+// Quote returns the latest stock quote for a symbol
+func (c *Client) Quote(ctx context.Context, symbol string) (Quote, error) {
+	qs, err := c.Quotes(ctx, []string{symbol})
+	return qs[0], err
+}
+
+// Quote returns the latest stock quotes for the symbols provided.
+func (c *Client) Quotes(ctx context.Context, symbols []string) ([]Quote, error) {
+	if len(symbols) == 0 {
+		return nil, fmt.Errorf("0 symbols provided")
+	}
+
 	url := baseURL("quotes") + "?symbols=" + strings.Join(symbols, ",")
 	var r struct{ Results []Quote }
 	err := c.get(ctx, url, &r)

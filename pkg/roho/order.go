@@ -70,13 +70,13 @@ type apiOrder struct {
 }
 
 // Buy buys an insstrument.
-func (c *Client) Buy(ctx context.Context, i *Instrument, o OrderOpts) (*OrderOutput, error) {
+func (c *Client) Buy(ctx context.Context, i Instrument, o OrderOpts) (*OrderOutput, error) {
 	o.Side = Buy
 	return c.Order(ctx, i.URL, i.Symbol, o)
 }
 
 // Sell sells an instrument.
-func (c *Client) Sell(ctx context.Context, i *Instrument, o OrderOpts) (*OrderOutput, error) {
+func (c *Client) Sell(ctx context.Context, i Instrument, o OrderOpts) (*OrderOutput, error) {
 	o.Side = Sell
 	return c.Order(ctx, i.URL, i.Symbol, o)
 }

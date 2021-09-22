@@ -3,6 +3,7 @@ package roho
 import (
 	"context"
 	"fmt"
+	"log"
 )
 
 // Instrument is a type to represent the "instrument" API type in the
@@ -34,35 +35,46 @@ type Instrument struct {
 	URL                   string      `json:"url"`
 }
 
-func (i Instrument) OrderURL() string {
-	return i.URL
-}
-
-func (i Instrument) OrderSymbol() string {
-	return i.Symbol
-}
-
-// Instrument returns an Instrument given a URL.
-func (c *Client) Instrument(ctx context.Context, instURL string) (*Instrument, error) {
-	var i Instrument
-	err := c.get(ctx, instURL, &i)
-	if err != nil {
-		return nil, err
-	}
-	return &i, err
-}
-
-// Lookup returns an Instrument given a ticker symbol.
-func (c *Client) Lookup(ctx context.Context, sym string) (*Instrument, error) {
+// Instruments returns an Instrument for a single stock symbol.
+func (c *Client) Instrument(ctx context.Context, symbol string) (Instrument, error) {
 	var i struct {
 		Results []Instrument
 	}
-	err := c.get(ctx, baseURL("instruments")+"?symbol="+sym, &i)
+
+	url := fmt.Sprintf("%s?symbol=%s", baseURL("instruments"), symbol)
+	log.Printf("url: %v", url)
+
+	err := c.get(ctx, url, &i)
 	if err != nil {
-		return nil, err
+		return Instrument{}, err
 	}
 	if len(i.Results) < 1 {
-		return nil, fmt.Errorf("no results")
+		return Instrument{}, fmt.Errorf("no results")
 	}
-	return &i.Results[0], err
+	return i.Results[0], err
+}
+
+// Instrument returns Instruments for a set of stock symbols
+func (c *Client) Instruments(ctx context.Context, syms []string) ([]Instrument, error) {
+	is := []Instrument{}
+	// Unlike quotes, RH has no native way to query for multiple symbols :(
+	for _, s := range syms {
+		i, err := c.Instrument(ctx, s)
+		if err != nil {
+			return is, fmt.Errorf("instrument %q: %w", s, err)
+		}
+		is = append(is, i)
+	}
+	return is, nil
+}
+
+// Instrument returns an Instrument given a URL.
+func (c *Client) InstrumentFromURL(ctx context.Context, url string) (Instrument, error) {
+	var i Instrument
+
+	if err := c.get(ctx, url, &i); err != nil {
+		return Instrument{}, err
+	}
+
+	return i, nil
 }
