@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -23,7 +22,7 @@ func cryptoURL(s string) string {
 // call retrieves from the endpoint and unmarshals resulting json into
 // the provided destination interface, which must be a pointer.
 func (c *Client) get(ctx context.Context, url string, dest interface{}) error {
-	log.Printf("url: %s", url)
+	// log.Printf("url: %s", url)
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		return err
@@ -65,7 +64,7 @@ func (c *Client) call(ctx context.Context, req *http.Request, dest interface{}) 
 		return e
 	}
 
-	log.Printf("response: %s", bs)
+	// log.Printf("response: %s", bs)
 	return json.NewDecoder(bytes.NewReader(bs)).Decode(dest)
 }
 
