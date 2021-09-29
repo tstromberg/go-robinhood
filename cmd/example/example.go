@@ -39,7 +39,7 @@ func main() {
 
 	sym := "SPY"
 	log.Printf("Looking up %s ...", sym)
-	i, err := r.Lookup(ctx, sym)
+	i, err := r.Instrument(ctx, sym)
 	if err != nil {
 		log.Fatalf("get instrument failed: %v", err)
 	}
@@ -59,11 +59,11 @@ func main() {
 		log.Printf("  %s: opened at %.2f, closed at %.2f", r.BeginsAt, r.OpenPrice, r.ClosePrice)
 	}
 
-	qs, err := r.Quote(ctx, "SPY")
+	q, err := r.Quote(ctx, "SPY")
 	if err != nil {
 		log.Fatalf("get quote failed: %v", err)
 	}
-	log.Printf("SPY current price is $%.2f", qs[0].Price())
+	log.Printf("SPY current price is $%.2f", q.Price())
 
 	if len(os.Args) == 1 {
 		return

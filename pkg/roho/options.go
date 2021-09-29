@@ -48,7 +48,7 @@ func (d *Date) UnmarshalJSON(bs []byte) error {
 }
 
 // OptionChains returns options for the given instruments.
-func (c *Client) OptionChains(ctx context.Context, is ...*Instrument) ([]*OptionChain, error) {
+func (c *Client) OptionChains(ctx context.Context, is ...Instrument) ([]*OptionChain, error) {
 	s := []string{}
 	for _, inst := range is {
 		s = append(s, inst.ID)
@@ -150,9 +150,10 @@ type MinTicks struct {
 // UnderlyingInstrument is the type that represents a link from an option back
 // to its standard financial instrument (stock).
 type UnderlyingInstrument struct {
-	ID         string `json:"id"`
-	Instrument string `json:"instrument"`
-	Quantity   int    `json:"quantity"`
+	ID            string `json:"id"`
+	InstrumentURL string `json:"instrument"`
+	InstrumentID  string `json:"instrument_id"`
+	Quantity      int    `json:"quantity"`
 }
 
 // An OptionInstrument can have a quote.

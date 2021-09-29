@@ -27,7 +27,7 @@ func TestMarketData(t *testing.T) {
 		t.Errorf("dial returned nil client")
 	}
 
-	i, err := c.Lookup(ctx, "SPY")
+	i, err := c.Instrument(ctx, "SPY")
 	if err != nil {
 		t.Errorf("lookup failed: %v", err)
 	}

@@ -54,7 +54,8 @@ type OrderOpts struct {
 
 type apiOrder struct {
 	Account       string    `json:"account,omitempty"`
-	Instrument    string    `json:"instrument,omitempty"`
+	InstrumentURL string    `json:"instrument,omitempty"`
+	InstrumentID  string    `json:"instrument_id,omitempty"`
 	Symbol        string    `json:"symbol,omitempty"`
 	Type          string    `json:"type,omitempty"`
 	TimeInForce   string    `json:"time_in_force,omitempty"`
@@ -70,25 +71,24 @@ type apiOrder struct {
 }
 
 // Buy buys an insstrument.
-func (c *Client) Buy(ctx context.Context, i *Instrument, o OrderOpts) (*OrderOutput, error) {
+func (c *Client) Buy(ctx context.Context, i Instrument, o OrderOpts) (*OrderOutput, error) {
 	o.Side = Buy
-	return c.order(ctx, i, o)
+	return c.Order(ctx, i.URL, i.Symbol, o)
 }
 
 // Sell sells an instrument.
-func (c *Client) Sell(ctx context.Context, i *Instrument, o OrderOpts) (*OrderOutput, error) {
+func (c *Client) Sell(ctx context.Context, i Instrument, o OrderOpts) (*OrderOutput, error) {
 	o.Side = Sell
-	return c.order(ctx, i, o)
+	return c.Order(ctx, i.URL, i.Symbol, o)
 }
 
-// Order places an order for a given instrument. Cancellation of the given
-// context cancels only the _http request_ and not any orders that may have
-// been created regardless of the cancellation.
-func (c *Client) order(ctx context.Context, i *Instrument, o OrderOpts) (*OrderOutput, error) {
+// Order places an order for a given instrument.
+// NOTE: Cancellation of the context cancels only the HTTP request. To cancel the order, call Order().
+func (c *Client) Order(ctx context.Context, url string, symbol string, o OrderOpts) (*OrderOutput, error) {
 	a := apiOrder{
 		Account:       c.Account.URL,
-		Instrument:    i.URL,
-		Symbol:        i.Symbol,
+		InstrumentURL: url,
+		Symbol:        symbol,
 		Type:          strings.ToLower(o.Type.String()),
 		TimeInForce:   strings.ToLower(o.TimeInForce.String()),
 		Quantity:      o.Quantity,
@@ -125,7 +125,7 @@ func (c *Client) order(ctx context.Context, i *Instrument, o OrderOpts) (*OrderO
 	return &out, nil
 }
 
-// OrderOutput is the response from the Order api.
+// OrderOutput is the response from the Order API.
 type OrderOutput struct {
 	Meta
 	Account                string        `json:"account"`

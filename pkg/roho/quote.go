@@ -2,6 +2,7 @@ package roho
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/tstromberg/roho/pkg/times"
@@ -22,11 +23,23 @@ type Quote struct {
 	Symbol                      string  `json:"symbol"`
 	TradingHalted               bool    `json:"trading_halted"`
 	UpdatedAt                   string  `json:"updated_at"`
+	InstrumentURL               string  `json:"instrument"`
+	InstrumentID                string  `json:"instrument_id"`
 }
 
-// Quote returns all the latest stock quotes for the list of stocks provided.
-func (c *Client) Quote(ctx context.Context, stocks ...string) ([]Quote, error) {
-	url := baseURL("quotes") + "?symbols=" + strings.Join(stocks, ",")
+// Quote returns the latest stock quote for a symbol.
+func (c *Client) Quote(ctx context.Context, symbol string) (Quote, error) {
+	qs, err := c.Quotes(ctx, []string{symbol})
+	return qs[0], err
+}
+
+// Quote returns the latest stock quotes for the symbols provided.
+func (c *Client) Quotes(ctx context.Context, symbols []string) ([]Quote, error) {
+	if len(symbols) == 0 {
+		return nil, fmt.Errorf("0 symbols provided")
+	}
+
+	url := baseURL("quotes") + "?symbols=" + strings.Join(symbols, ",")
 	var r struct{ Results []Quote }
 	err := c.get(ctx, url, &r)
 	return r.Results, err

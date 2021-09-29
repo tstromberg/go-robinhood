@@ -18,13 +18,38 @@ type Fundamental struct {
 	MarketCap     float64 `json:"market_cap,string"`
 	PERatio       float64 `json:"pe_ratio,string"`
 	Description   string  `json:"description"`
-	Instrument    string  `json:"instrument"`
+	InstrumentURL string  `json:"instrument"`
 }
 
-// Fundamentals returns fundamental data for the list of stocks provided.
-func (c *Client) Fundamentals(ctx context.Context, stocks ...string) ([]Fundamental, error) {
-	url := baseURL("fundamentals") + "?symbols=" + strings.Join(stocks, ",")
-	var r struct{ Results []Fundamental }
-	err := c.get(ctx, url, &r)
-	return r.Results, err
+// Fundamentals returns fundamental data for the list of stock symbols provided.
+func (c *Client) Fundamentals(ctx context.Context, syms ...string) ([]Fundamental, error) {
+	fs := []Fundamental{}
+
+	// Robinhood Fundamentals API only allows 100 symbols at a time
+	for _, ck := range chunkStrings(syms, 100) {
+		url := baseURL("fundamentals") + "?symbols=" + strings.Join(ck, ",")
+		var r struct{ Results []Fundamental }
+		if err := c.get(ctx, url, &r); err != nil {
+			return fs, err
+		}
+		fs = append(fs, r.Results...)
+	}
+
+	return fs, nil
+}
+
+// chunkStrings divides a slice of strings into chunks of a specified size.
+func chunkStrings(input []string, size int) [][]string {
+	var chunks [][]string
+
+	for i := 0; i < len(input); i += size {
+		end := i + size
+
+		if end > len(input) {
+			end = len(input)
+		}
+
+		chunks = append(chunks, input[i:end])
+	}
+	return chunks
 }
