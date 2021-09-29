@@ -2,7 +2,9 @@
 package index
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
@@ -11,11 +13,26 @@ import (
 // TODO: NDX, Russel 2000, DJI, Nasdaq Composite
 // TODO: Cache results for 24h
 
-// SP500 returns the symbols on the S&P 500
-func SP500() ([]string, error) {
+// SP500 returns the symbols on the S&P 500.
+func SP500(ctx context.Context) ([]string, error) {
 	symbols := []string{}
 
-	doc, err := goquery.NewDocument("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies")
+	req, err := http.NewRequestWithContext(ctx, "GET", "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies", nil)
+	if err != nil {
+		return nil, fmt.Errorf("request: %w", err)
+	}
+	c := &http.Client{}
+	res, err := c.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("do: %w", err)
+	}
+	defer res.Body.Close()
+	if res.StatusCode != 200 {
+		return nil, fmt.Errorf("unexpected status code: %d", res.StatusCode)
+	}
+
+	// Load the HTML document
+	doc, err := goquery.NewDocumentFromReader(res.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -30,16 +47,16 @@ func SP500() ([]string, error) {
 	return symbols, nil
 }
 
-// SP50 returns the top-50 from the S&P 500
-func SP50() ([]string, error) {
-	symbols, err := SP500()
+// SP50 returns the top-50 from the S&P 500.
+func SP50(ctx context.Context) ([]string, error) {
+	symbols, err := SP500(ctx)
 	if err != nil {
 		return nil, err
 	}
 	return symbols[0:50], nil
 }
 
-func Resolve(syms []string) ([]string, error) {
+func Resolve(ctx context.Context, syms []string) ([]string, error) {
 	rs := []string{}
 	for _, s := range syms {
 		if !strings.HasPrefix(s, "^") {
@@ -48,13 +65,13 @@ func Resolve(syms []string) ([]string, error) {
 
 		switch s {
 		case "^SP500":
-			sp, err := SP500()
+			sp, err := SP500(ctx)
 			if err != nil {
 				return rs, err
 			}
 			rs = append(rs, sp...)
 		case "^SP50":
-			sp, err := SP50()
+			sp, err := SP50(ctx)
 			if err != nil {
 				return rs, err
 			}

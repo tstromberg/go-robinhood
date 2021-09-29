@@ -54,7 +54,7 @@ func (c *Client) Instrument(ctx context.Context, symbol string) (Instrument, err
 	return i.Results[0], err
 }
 
-// Instrument returns Instruments for a set of stock symbols
+// Instrument returns Instruments for a set of stock symbols.
 func (c *Client) Instruments(ctx context.Context, syms []string) ([]Instrument, error) {
 	is := []Instrument{}
 	// Unlike quotes, RH has no native way to query for multiple symbols :(

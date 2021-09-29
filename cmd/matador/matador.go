@@ -1,4 +1,4 @@
-// Matador runs trading strategies
+// Matador is a demonstration program to run trading strategies
 package main
 
 // usage:
@@ -23,15 +23,20 @@ var (
 	strategyFlag        = flag.String("strategy", "", fmt.Sprintf("strategy to use. Choices: %v", strategy.List()))
 	minPollFlag         = flag.Duration("min-poll", 5*time.Second, "minimum time to poll (even if errors happen)")
 	maxPollFlag         = flag.Duration("max-poll", 60*time.Second, "maximum time to poll")
-	maxBuysFlag         = flag.Int("max-buys", 1000, "maximum buys before exiting")
+	maxBuysFlag         = flag.Int("max-buys", 5, "maximum buys before exiting")
 	maxBuysPerPollFlag  = flag.Int("max-buys-per-poll", 1, "maximum buys per polling period")
-	maxSalesFlag        = flag.Int("max-sales", 1000, "maximum sales before exiting")
+	maxSalesFlag        = flag.Int("max-sales", 5, "maximum sales before exiting")
 	maxSalesPerPollFlag = flag.Int("max-sales-per-poll", 1, "maximum sales per polling period")
 )
 
 func main() {
 	klog.InitFlags(nil)
 	flag.Parse()
+
+	if !*dryRunFlag {
+		klog.Warningf("matador is not in dry-run mode. You will lose money (sleeping for 10s)")
+		time.Sleep(10 * time.Second)
+	}
 
 	ctx := context.Background()
 	r, err := roho.New(ctx, &roho.Config{})
@@ -45,7 +50,7 @@ func main() {
 		klog.Fatalf("usage: matador --strategy=X [symbols]")
 	}
 
-	syms, err := index.Resolve(flag.Args())
+	syms, err := index.Resolve(ctx, flag.Args())
 	if err != nil {
 		klog.Fatalf("failed to resolve symbols: %v", err)
 	}
@@ -55,7 +60,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	st, err := strategy.New(ctx, strategy.Config{Client: r, Kind: *strategyFlag})
+	st, err := strategy.New(strategy.Config{Client: r, Kind: *strategyFlag})
 	if err != nil {
 		klog.Errorf("strategy failed: %v", err)
 		os.Exit(1)
@@ -84,7 +89,12 @@ func trade(ctx context.Context, r *roho.Client, t strategy.Trade, dryRun bool) e
 	}
 
 	klog.Infof("%s %d shares of %q at %.2f ...", act, t.Order.Quantity, sym, t.Order.Price)
-	return nil
+	if dryRun {
+		return nil
+	}
+	out, err := r.Order(ctx, t.InstrumentURL, t.Symbol, t.Order)
+	klog.Infof("order result: %+v", out)
+	return err
 }
 
 func loop(ctx context.Context, r *roho.Client, st strategy.Strategy, syms []string) {
@@ -116,13 +126,13 @@ func loop(ctx context.Context, r *roho.Client, st strategy.Strategy, syms []stri
 		for _, t := range ts {
 			if t.Order.Side == roho.Buy {
 				buys++
-				totalBuys++
 				if buys > *maxBuysPerPollFlag {
-					klog.Warningf(" -> BUY %d (ignoring): %+v", t)
+					klog.Warningf(" -> BUY %s (ignoring, over max-buys-per-poll=%d): %+v", t.Symbol, *maxBuysPerPollFlag, t)
 					continue
 				}
 
-				if totalBuys >= *maxBuysFlag {
+				totalBuys++
+				if totalBuys > *maxBuysFlag {
 					klog.Errorf("hit maximum buys (%d) - exiting", totalBuys)
 					return
 				}
@@ -130,14 +140,14 @@ func loop(ctx context.Context, r *roho.Client, st strategy.Strategy, syms []stri
 
 			if t.Order.Side == roho.Sell {
 				sales++
-				totalSales++
 
 				if sales > *maxSalesPerPollFlag {
-					klog.Warningf(" -> SELL %d (ignoring): %+v", t)
+					klog.Warningf(" -> SELL %s (ignoring, over max-sales-per-poll=%d): %+v", t.Symbol, *maxSalesPerPollFlag, t)
 					continue
 				}
 
-				if totalSales >= *maxSalesFlag {
+				totalSales++
+				if totalSales > *maxSalesFlag {
 					klog.Errorf("hit maximum sales (%d) - exiting", totalSales)
 					return
 				}

@@ -5,14 +5,13 @@ import (
 	"crypto/rand"
 	"fmt"
 	"math/big"
-	"time"
 
 	"github.com/tstromberg/roho/pkg/roho"
 )
 
 var myLuckyNumber = int64(4)
 
-// Randob is a simple strategy to buy stocks at 7.77 and sell them at 8.88
+// RandomStrategy is a demonstration strategy to buy/sell stocks at random.
 type RandomStrategy struct {
 	c Config
 }
@@ -21,7 +20,7 @@ func (cr *RandomStrategy) String() string {
 	return "Random"
 }
 
-func (cr *RandomStrategy) Trades(ctx context.Context, cs map[string]*CombinedStock) ([]Trade, error) {
+func (cr *RandomStrategy) Trades(_ context.Context, cs map[string]*CombinedStock) ([]Trade, error) {
 	maxRand := int64(len(cs)) * myLuckyNumber
 	ts := []Trade{}
 
@@ -38,7 +37,6 @@ func (cr *RandomStrategy) Trades(ctx context.Context, cs map[string]*CombinedSto
 			continue
 		}
 		ts = append(ts, Trade{Symbol: sym, Order: roho.OrderOpts{Price: c.Position.AverageBuyPrice, Quantity: uint64(c.Position.Quantity), Side: roho.Sell}})
-
 	}
 
 	for sym, c := range cs {
@@ -53,8 +51,4 @@ func (cr *RandomStrategy) Trades(ctx context.Context, cs map[string]*CombinedSto
 	}
 
 	return ts, nil
-}
-
-func (cr *RandomStrategy) SetTime(ctx context.Context, _ time.Time) error {
-	return nil
 }

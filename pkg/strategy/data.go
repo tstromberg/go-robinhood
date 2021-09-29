@@ -9,7 +9,7 @@ import (
 	"github.com/tstromberg/roho/pkg/roho"
 )
 
-// LiveData gathers combined live stock information
+// LiveData gathers combined live stock information.
 func LiveData(ctx context.Context, r *roho.Client, syms []string) (map[string]*CombinedStock, error) {
 	cs := map[string]*CombinedStock{}
 
@@ -19,6 +19,8 @@ func LiveData(ctx context.Context, r *roho.Client, syms []string) (map[string]*C
 	}
 
 	for _, p := range ps {
+		// avoid implicit memory aliasing within a for loop
+		p := p
 		log.Printf("position: %s", p.InstrumentURL)
 		cs[p.InstrumentURL] = &CombinedStock{Position: &p}
 
@@ -36,6 +38,8 @@ func LiveData(ctx context.Context, r *roho.Client, syms []string) (map[string]*C
 	}
 
 	for _, q := range qs {
+		// avoid implicit memory aliasing within a for loop
+		q := q
 		_, ok := cs[q.InstrumentURL]
 		if !ok {
 			cs[q.InstrumentURL] = &CombinedStock{}
@@ -49,14 +53,16 @@ func LiveData(ctx context.Context, r *roho.Client, syms []string) (map[string]*C
 	}
 
 	for _, f := range fs {
+		// avoid implicit memory aliasing within a for loop
+		f := f
 		cs[f.InstrumentURL].Fundamentals = &f
 	}
 
 	return cs, nil
 }
 
-// HistoricalData simulates data at a particular point in the past - NOT YET IMPLEMENTED
-func HistoricalData(ctx context.Context, r *roho.Client, syms []string, t time.Time) (map[string]*CombinedStock, error) {
+// HistoricalData simulates data at a particular point in the past - NOT YET IMPLEMENTED.
+func HistoricalData(_ context.Context, _ *roho.Client, _ []string, _ time.Time) (map[string]*CombinedStock, error) {
 	cs := map[string]*CombinedStock{}
 	return cs, fmt.Errorf("HistoricalData is NOT YET IMPLEMENTED")
 }

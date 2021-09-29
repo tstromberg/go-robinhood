@@ -10,7 +10,8 @@ import (
 var (
 	LuckySevens = "lucky-sevens"
 	Random      = "random"
-	strategies  = []string{LuckySevens, Random}
+	HiLo        = "hilo"
+	strategies  = []string{LuckySevens, Random, HiLo}
 )
 
 type Trade struct {
@@ -27,7 +28,7 @@ type CombinedStock struct {
 	Historical   *roho.Historical
 }
 
-// Strategy is an interface for executing stock strategies
+// Strategy is an interface for executing stock strategies.
 type Strategy interface {
 	Trades(ctx context.Context, cs map[string]*CombinedStock) ([]Trade, error)
 	String() string
@@ -39,8 +40,8 @@ type Config struct {
 	Holdings []string
 }
 
-// New returns a new strategy manager
-func New(ctx context.Context, c Config) (Strategy, error) {
+// New returns a new strategy manager.
+func New(c Config) (Strategy, error) {
 	switch c.Kind {
 	case LuckySevens:
 		l := &LuckySevensStrategy{c: c}
@@ -48,12 +49,15 @@ func New(ctx context.Context, c Config) (Strategy, error) {
 	case Random:
 		l := &RandomStrategy{c: c}
 		return l, nil
+	case HiLo:
+		l := &HiLoStrategy{c: c}
+		return l, nil
 	default:
 		return nil, fmt.Errorf("no strategy named %q exists", c.Kind)
 	}
 }
 
-// List returns a list of strategies
+// List returns a list of strategies.
 func List() []string {
 	return strategies
 }

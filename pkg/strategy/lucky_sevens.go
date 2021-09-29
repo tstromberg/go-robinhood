@@ -13,7 +13,7 @@ var (
 	eightRe = regexp.MustCompile(`^[8\.]+[80]$`)
 )
 
-// LuckySevens is a simple strategy to buy stocks at 7.77 and sell them at 8.88
+// LuckySevensStrategy is a demonstration strategy to buy stocks at 7.77 and sell them at 8.88.
 type LuckySevensStrategy struct {
 	c Config
 }
@@ -22,7 +22,7 @@ func (cr *LuckySevensStrategy) String() string {
 	return "Lucky Sevens"
 }
 
-func (cr *LuckySevensStrategy) Trades(ctx context.Context, cs map[string]*CombinedStock) ([]Trade, error) {
+func (cr *LuckySevensStrategy) Trades(_ context.Context, cs map[string]*CombinedStock) ([]Trade, error) {
 	ts := []Trade{}
 
 	for url, s := range cs {

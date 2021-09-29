@@ -83,7 +83,7 @@ func (c *Client) Sell(ctx context.Context, i Instrument, o OrderOpts) (*OrderOut
 }
 
 // Order places an order for a given instrument.
-// NOTE: Cancellation of the context cancels only the HTTP request. To cancel the order, call Order()
+// NOTE: Cancellation of the context cancels only the HTTP request. To cancel the order, call Order().
 func (c *Client) Order(ctx context.Context, url string, symbol string, o OrderOpts) (*OrderOutput, error) {
 	a := apiOrder{
 		Account:       c.Account.URL,

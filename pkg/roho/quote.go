@@ -27,7 +27,7 @@ type Quote struct {
 	InstrumentID                string  `json:"instrument_id"`
 }
 
-// Quote returns the latest stock quote for a symbol
+// Quote returns the latest stock quote for a symbol.
 func (c *Client) Quote(ctx context.Context, symbol string) (Quote, error) {
 	qs, err := c.Quotes(ctx, []string{symbol})
 	return qs[0], err
