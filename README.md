@@ -42,7 +42,7 @@ RoHo now ships with a `pkg/strategy` library to define and execute basic trading
 *NOTE: You will lose money if you use RoHo's trading strategies feature*
 
 
-Here is the [hilo example strategy](pkg/strategy/hilo.go) to buy low, sell high:
+Here is a simplified example from the [hilo example strategy](pkg/strategy/hilo.go), to buy low, sell high:
 
 ```go
 func (cr *HiLoStrategy) Trades(_ context.Context, cs map[string]*CombinedStock) ([]Trade, error) {
@@ -57,11 +57,7 @@ func (cr *HiLoStrategy) Trades(_ context.Context, cs map[string]*CombinedStock) 
 				ts = append(ts, Trade{
 					InstrumentURL: url,
 					Symbol:        s.Quote.Symbol,
-					Order:         roho.OrderOpts{
-            Price: s.Quote.AskPrice,
-            Quantity: 1,
-            Side: roho.Buy
-           },
+					Order:         roho.OrderOpts{...},
 				})
 			}
 			continue
@@ -76,11 +72,7 @@ func (cr *HiLoStrategy) Trades(_ context.Context, cs map[string]*CombinedStock) 
 			ts = append(ts, Trade{
 				InstrumentURL: url,
 				Symbol:        s.Quote.Symbol,
-				Order:         roho.OrderOpts{
-          Price: p.Quote.BidPrice,
-          Quantity: uint64(p.Quantity),
-          Side: roho.Sell
-         },
+				Order:         roho.OrderOpts{...},
 			})
 		}
 	}
