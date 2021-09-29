@@ -3,7 +3,6 @@ package strategy
 import (
 	"context"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/tstromberg/roho/pkg/roho"
@@ -21,7 +20,6 @@ func LiveData(ctx context.Context, r *roho.Client, syms []string) (map[string]*C
 	for _, p := range ps {
 		// avoid implicit memory aliasing within a for loop
 		p := p
-		log.Printf("position: %s", p.InstrumentURL)
 		cs[p.InstrumentURL] = &CombinedStock{Position: &p}
 
 		f, err := r.InstrumentFromURL(ctx, p.InstrumentURL)
