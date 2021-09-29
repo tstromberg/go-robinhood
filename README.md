@@ -13,16 +13,17 @@ A new Go-language client library for accessing the Robinhood API. Based on https
 * Idiomatic Go API
 * Buying & selling shares and cryptocurrencies
 * Access to historical quotes & crypto positions
+* Common interface for trading strategies
 * Designed for use by trading bots
 
-## Usage
+## Library Usage
 
 ```go
 // Login to Robinhood. Uses $RH_USER and $RH_PASS environment variables by default
 r, err := roho.New(&roho.Config{})
 
 // Lookup the SPDR S&P 500 ETF Trust
-i, err := r.Lookup("SPY")
+i, err := r.Instrument("SPY")
 
 // Buy SPY at $100
 o, err := r.Buy(i, roho.OrderOpts{Price: 100.0, Quantity: 1})
@@ -33,9 +34,65 @@ o.Cancel()
 
 For a runnable example, see [cmd/example](cmd/example).
 
+
+## Trading Strategies
+
+RoHo now ships with a `pkg/strategy` library to define and execute basic trading strategies.
+
+*NOTE: You will lose money if you use RoHo's trading strategies feature*
+
+
+Here is the [hilo example strategy](pkg/strategy/hilo.go) to buy low, sell high:
+
+```go
+func (cr *HiLoStrategy) Trades(_ context.Context, cs map[string]*CombinedStock) ([]Trade, error) {
+	ts := []Trade{}
+
+	for url, s := range cs {
+		p := s.Position
+
+		if p == nil {
+			ratio := s.Quote.BidPrice / s.Fundamentals.Low52Weeks
+			if ratio < 1.01 {
+				ts = append(ts, Trade{
+					InstrumentURL: url,
+					Symbol:        s.Quote.Symbol,
+					Order:         roho.OrderOpts{
+            Price: s.Quote.AskPrice,
+            Quantity: 1,
+            Side: roho.Buy
+           },
+				})
+			}
+			continue
+		}
+
+		ratio := s.Quote.BidPrice / s.Fundamentals.High52Weeks
+		if ratio > 0.99 {
+			if p.AverageBuyPrice < s.Quote.BidPrice {
+				continue
+			}
+
+			ts = append(ts, Trade{
+				InstrumentURL: url,
+				Symbol:        s.Quote.Symbol,
+				Order:         roho.OrderOpts{
+          Price: p.Quote.BidPrice,
+          Quantity: uint64(p.Quantity),
+          Side: roho.Sell
+         },
+			})
+		}
+	}
+
+	return ts, nil
+}
+```
+
+
+You can run these strategies by using [cmd/matador](cmd/matador)
+
 ## Approximate 2021 Roadmap
 
-* Add 1st-class support for executing pluggable trading strategies
-* Add 1st-class support for backtesting trading strategies
+* Add backtesting support
 * Add response caching for offline testing
-* Profit!
