@@ -18,7 +18,7 @@ type Fundamental struct {
 	MarketCap     float64 `json:"market_cap,string"`
 	PERatio       float64 `json:"pe_ratio,string"`
 	Description   string  `json:"description"`
-	Instrument    string  `json:"instrument"`
+	InstrumentURL string  `json:"instrument"`
 }
 
 // Fundamentals returns fundamental data for the list of stocks provided.

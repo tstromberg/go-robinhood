@@ -5,7 +5,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
+	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -22,6 +23,7 @@ func cryptoURL(s string) string {
 // call retrieves from the endpoint and unmarshals resulting json into
 // the provided destination interface, which must be a pointer.
 func (c *Client) get(ctx context.Context, url string, dest interface{}) error {
+	log.Printf("url: %s", url)
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		return err
@@ -49,17 +51,22 @@ func (c *Client) call(ctx context.Context, req *http.Request, dest interface{}) 
 	}
 	defer res.Body.Close()
 
+	bs, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return fmt.Errorf("readall: %w", err)
+	}
+
 	if res.StatusCode >= 400 {
-		b := &bytes.Buffer{}
 		var e ErrorMap
-		err = json.NewDecoder(io.TeeReader(res.Body, b)).Decode(&e)
+		err = json.NewDecoder(bytes.NewReader(bs)).Decode(&e)
 		if err != nil {
-			return fmt.Errorf("got response %q and could not decode error body %q", res.Status, b.String())
+			return fmt.Errorf("got response %q and could not decode error body %q", res.Status, bs)
 		}
 		return e
 	}
 
-	return json.NewDecoder(res.Body).Decode(dest)
+	log.Printf("response: %s", bs)
+	return json.NewDecoder(bytes.NewReader(bs)).Decode(dest)
 }
 
 // Meta holds metadata common to many RobinHood types.

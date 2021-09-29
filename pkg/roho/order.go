@@ -54,7 +54,8 @@ type OrderOpts struct {
 
 type apiOrder struct {
 	Account       string    `json:"account,omitempty"`
-	Instrument    string    `json:"instrument,omitempty"`
+	InstrumentURL string    `json:"instrument,omitempty"`
+	InstrumentID  string    `json:"instrument_id,omitempty"`
 	Symbol        string    `json:"symbol,omitempty"`
 	Type          string    `json:"type,omitempty"`
 	TimeInForce   string    `json:"time_in_force,omitempty"`
@@ -86,7 +87,7 @@ func (c *Client) Sell(ctx context.Context, i Instrument, o OrderOpts) (*OrderOut
 func (c *Client) Order(ctx context.Context, url string, symbol string, o OrderOpts) (*OrderOutput, error) {
 	a := apiOrder{
 		Account:       c.Account.URL,
-		Instrument:    url,
+		InstrumentURL: url,
 		Symbol:        symbol,
 		Type:          strings.ToLower(o.Type.String()),
 		TimeInForce:   strings.ToLower(o.TimeInForce.String()),

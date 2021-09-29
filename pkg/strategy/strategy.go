@@ -3,7 +3,6 @@ package strategy
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/tstromberg/roho/pkg/roho"
 )
@@ -21,10 +20,16 @@ type Trade struct {
 	Reason        string
 }
 
+type CombinedStock struct {
+	Quote        *roho.Quote
+	Fundamentals *roho.Fundamental
+	Position     *roho.Position
+	Historical   *roho.Historical
+}
+
 // Strategy is an interface for executing stock strategies
 type Strategy interface {
-	Trades(ctx context.Context, ps []roho.Position, qs []roho.Quote) ([]Trade, error)
-	SetTime(ctx context.Context, t time.Time) error
+	Trades(ctx context.Context, cs map[string]*CombinedStock) ([]Trade, error)
 	String() string
 }
 

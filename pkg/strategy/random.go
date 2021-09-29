@@ -10,9 +10,7 @@ import (
 	"github.com/tstromberg/roho/pkg/roho"
 )
 
-var (
-	myLuckyNumber = int64(4)
-)
+var myLuckyNumber = int64(4)
 
 // Randob is a simple strategy to buy stocks at 7.77 and sell them at 8.88
 type RandomStrategy struct {
@@ -23,11 +21,15 @@ func (cr *RandomStrategy) String() string {
 	return "Random"
 }
 
-func (cr *RandomStrategy) Trades(ctx context.Context, ps []roho.Position, qs []roho.Quote) ([]Trade, error) {
-	maxRand := int64(len(ps)+len(qs)) * myLuckyNumber
+func (cr *RandomStrategy) Trades(ctx context.Context, cs map[string]*CombinedStock) ([]Trade, error) {
+	maxRand := int64(len(cs)) * myLuckyNumber
 	ts := []Trade{}
 
-	for _, p := range ps {
+	for sym, c := range cs {
+		if c.Position == nil {
+			continue
+		}
+
 		nb, err := rand.Int(rand.Reader, big.NewInt(maxRand))
 		if err != nil {
 			return ts, fmt.Errorf("rand int: %w", err)
@@ -35,11 +37,11 @@ func (cr *RandomStrategy) Trades(ctx context.Context, ps []roho.Position, qs []r
 		if nb.Int64() != myLuckyNumber {
 			continue
 		}
-		ts = append(ts, Trade{InstrumentURL: p.Instrument, Order: roho.OrderOpts{Price: p.AverageBuyPrice, Quantity: uint64(p.Quantity), Side: roho.Sell}})
+		ts = append(ts, Trade{Symbol: sym, Order: roho.OrderOpts{Price: c.Position.AverageBuyPrice, Quantity: uint64(c.Position.Quantity), Side: roho.Sell}})
 
 	}
 
-	for _, q := range qs {
+	for sym, c := range cs {
 		nb, err := rand.Int(rand.Reader, big.NewInt(maxRand))
 		if err != nil {
 			return ts, fmt.Errorf("rand int: %w", err)
@@ -47,7 +49,7 @@ func (cr *RandomStrategy) Trades(ctx context.Context, ps []roho.Position, qs []r
 		if nb.Int64() != myLuckyNumber {
 			continue
 		}
-		ts = append(ts, Trade{Symbol: q.Symbol, Order: roho.OrderOpts{Price: q.AskPrice, Quantity: 7, Side: roho.Buy}})
+		ts = append(ts, Trade{Symbol: sym, Order: roho.OrderOpts{Price: c.Quote.AskPrice, Quantity: uint64(myLuckyNumber), Side: roho.Buy}})
 	}
 
 	return ts, nil

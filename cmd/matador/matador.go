@@ -97,22 +97,15 @@ func loop(ctx context.Context, r *roho.Client, st strategy.Strategy, syms []stri
 	for {
 		klog.Infof("sleeping for %s ...", *minPollFlag)
 		time.Sleep(*minPollFlag)
-		klog.Infof("gathering quotes for %d symbols ...", len(syms))
 
-		qs, err := r.Quotes(ctx, syms)
+		// TODO: update instead of rebuild
+		combined, err := strategy.LiveData(ctx, r, syms)
 		if err != nil {
-			klog.Errorf("failed to quote instruments: %v", err)
+			klog.Errorf("live data failed: %v", err)
 			continue
 		}
 
-		ps, err := r.Positions(ctx)
-		if err != nil {
-			klog.Errorf("failed to get positions: %v", err)
-		}
-
-		klog.Infof("calculating trades for %d positions ...", len(ps))
-
-		ts, err := st.Trades(ctx, ps, qs)
+		ts, err := st.Trades(ctx, combined)
 		if err != nil {
 			klog.Errorf("trades failed: %v", err)
 			continue

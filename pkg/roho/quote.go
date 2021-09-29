@@ -23,6 +23,8 @@ type Quote struct {
 	Symbol                      string  `json:"symbol"`
 	TradingHalted               bool    `json:"trading_halted"`
 	UpdatedAt                   string  `json:"updated_at"`
+	InstrumentURL               string  `json:"instrument"`
+	InstrumentID                string  `json:"instrument_id"`
 }
 
 // Quote returns the latest stock quote for a symbol

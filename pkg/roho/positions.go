@@ -9,7 +9,8 @@ type Position struct {
 	Meta
 	Account                 string  `json:"account"`
 	AverageBuyPrice         float64 `json:"average_buy_price,string"`
-	Instrument              string  `json:"instrument"`
+	InstrumentURL           string  `json:"instrument"`
+	InstrumentID            string  `json:"instrument_id"`
 	IntradayAverageBuyPrice float64 `json:"intraday_average_buy_price,string"`
 	IntradayQuantity        float64 `json:"intraday_quantity,string"`
 	Quantity                float64 `json:"quantity,string"`

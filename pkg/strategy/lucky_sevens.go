@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"regexp"
-	"time"
 
 	"github.com/tstromberg/roho/pkg/roho"
 )
@@ -23,26 +22,24 @@ func (cr *LuckySevensStrategy) String() string {
 	return "Lucky Sevens"
 }
 
-func (cr *LuckySevensStrategy) Trades(ctx context.Context, ps []roho.Position, qs []roho.Quote) ([]Trade, error) {
+func (cr *LuckySevensStrategy) Trades(ctx context.Context, cs map[string]*CombinedStock) ([]Trade, error) {
 	ts := []Trade{}
 
-	for _, p := range ps {
-		bid := fmt.Sprintf("%.2f", p.AverageBuyPrice)
-		if eightRe.MatchString(bid) {
-			ts = append(ts, Trade{InstrumentURL: p.Instrument, Order: roho.OrderOpts{Price: p.AverageBuyPrice, Quantity: uint64(p.Quantity), Side: roho.Sell}})
+	for url, s := range cs {
+		p := s.Position
+		if p != nil {
+			bid := fmt.Sprintf("%.2f", p.AverageBuyPrice)
+			if eightRe.MatchString(bid) {
+				ts = append(ts, Trade{InstrumentURL: url, Order: roho.OrderOpts{Price: p.AverageBuyPrice, Quantity: uint64(p.Quantity), Side: roho.Sell}})
+				continue
+			}
 		}
-	}
 
-	for _, q := range qs {
-		ask := fmt.Sprintf("%.2f", q.AskPrice)
+		ask := fmt.Sprintf("%.2f", s.Quote.AskPrice)
 		if sevenRe.MatchString(ask) {
-			ts = append(ts, Trade{Symbol: q.Symbol, Order: roho.OrderOpts{Price: q.AskPrice, Quantity: 7, Side: roho.Buy}})
+			ts = append(ts, Trade{Symbol: s.Quote.Symbol, Order: roho.OrderOpts{Price: s.Quote.AskPrice, Quantity: 7, Side: roho.Buy}})
 		}
 	}
 
 	return ts, nil
-}
-
-func (cr *LuckySevensStrategy) SetTime(ctx context.Context, _ time.Time) error {
-	return nil
 }
