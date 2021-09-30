@@ -15,14 +15,14 @@ var (
 )
 
 type Trade struct {
-	Symbol        string
-	InstrumentURL string
-	Order         roho.OrderOpts
-	Reason        string
+	Instrument *roho.Instrument
+	Order      roho.OrderOpts
+	Reason     string
 }
 
 type CombinedStock struct {
 	Quote        *roho.Quote
+	Instrument   *roho.Instrument
 	Fundamentals *roho.Fundamental
 	Position     *roho.Position
 	Historical   *roho.Historical
@@ -30,14 +30,14 @@ type CombinedStock struct {
 
 // Strategy is an interface for executing stock strategies.
 type Strategy interface {
-	Trades(ctx context.Context, cs map[string]*CombinedStock) ([]Trade, error)
+	Trades(ctx context.Context, cs []*CombinedStock) ([]Trade, error)
 	String() string
 }
 
 type Config struct {
-	Client   *roho.Client
-	Kind     string
-	Holdings []string
+	Client *roho.Client
+	Kind   string
+	Values map[string]int64
 }
 
 // New returns a new strategy manager.
