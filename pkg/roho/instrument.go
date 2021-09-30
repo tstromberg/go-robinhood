@@ -3,7 +3,6 @@ package roho
 import (
 	"context"
 	"fmt"
-	"log"
 )
 
 // Instrument is a type to represent the "instrument" API type in the
@@ -42,7 +41,6 @@ func (c *Client) Instrument(ctx context.Context, symbol string) (Instrument, err
 	}
 
 	url := fmt.Sprintf("%s?symbol=%s", baseURL("instruments"), symbol)
-	log.Printf("url: %v", url)
 
 	err := c.get(ctx, url, &i)
 	if err != nil {

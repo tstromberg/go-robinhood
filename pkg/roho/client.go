@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"k8s.io/klog/v2"
 )
 
 func baseURL(s string) string {
@@ -22,7 +24,6 @@ func cryptoURL(s string) string {
 // call retrieves from the endpoint and unmarshals resulting json into
 // the provided destination interface, which must be a pointer.
 func (c *Client) get(ctx context.Context, url string, dest interface{}) error {
-	// log.Printf("url: %s", url)
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		return err
@@ -44,6 +45,8 @@ func (e ErrorMap) Error() string {
 
 // call provides useful abstractions around common errors and decoding issues.
 func (c *Client) call(ctx context.Context, req *http.Request, dest interface{}) error {
+	klog.V(1).Infof("%s %q", req.Method, req.URL)
+
 	res, err := c.Do(req.WithContext(ctx))
 	if err != nil {
 		return err
@@ -64,7 +67,7 @@ func (c *Client) call(ctx context.Context, req *http.Request, dest interface{}) 
 		return e
 	}
 
-	// log.Printf("response: %s", bs)
+	klog.V(1).Infof("%q response: %s", req.URL, bs)
 	return json.NewDecoder(bytes.NewReader(bs)).Decode(dest)
 }
 

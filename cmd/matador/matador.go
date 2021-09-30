@@ -79,86 +79,114 @@ func trade(ctx context.Context, r *roho.Client, t strategy.Trade, dryRun bool) e
 		act = "[DRY RUN] " + act
 	}
 
-	sym := t.Symbol
-	if sym == "" && t.InstrumentURL != "" {
-		i, err := r.InstrumentFromURL(ctx, t.InstrumentURL)
-		if err != nil {
-			return fmt.Errorf("instrument from URL: %w", err)
-		}
-		sym = i.Symbol
-	}
-
-	klog.Infof("%s %d shares of %q at %.2f ...", act, t.Order.Quantity, sym, t.Order.Price)
+	klog.Infof("%s %d shares of %q at %.2f: %q ...", act, t.Order.Quantity, t.Instrument.Symbol, t.Order.Price, t.Reason)
 	if dryRun {
 		return nil
 	}
-	out, err := r.Order(ctx, t.InstrumentURL, t.Symbol, t.Order)
+	out, err := r.Order(ctx, t.Instrument.URL, t.Instrument.Symbol, t.Order)
 	klog.Infof("order result: %+v", out)
 	return err
 }
 
+type Counter struct {
+	TotalBuys  int
+	TotalSales int
+	PollBuys   int
+	PollSales  int
+	Polls      int
+}
+
 func loop(ctx context.Context, r *roho.Client, st strategy.Strategy, syms []string) {
-	totalBuys := 0
-	totalSales := 0
 	klog.Infof("%q loop has begun with %d symbols!", st, len(syms))
 
 	maxSleep := *maxPollFlag - *minPollFlag
+	counter := &Counter{}
+
+	klog.Infof("Gathering live data for %d symbols ...", len(syms))
+	tctx, cancel := context.WithTimeout(ctx, 2*time.Minute)
+	defer cancel()
+
+	combined, err := strategy.LiveData(tctx, r, syms)
+	if err != nil {
+		klog.Errorf("live data: %v", err)
+		return
+	}
 
 	for {
-		klog.Infof("sleeping for %s ...", *minPollFlag)
-		time.Sleep(*minPollFlag)
+		counter.Polls++
 
-		// TODO: update instead of rebuild
-		combined, err := strategy.LiveData(ctx, r, syms)
+		if counter.Polls > 1 {
+			klog.Infof("%d buys, %d sells. Sleeping for %s...", counter.TotalBuys, counter.TotalSales, maxSleep)
+			time.Sleep(maxSleep)
+			klog.Infof("Updating data for %s symbols ...", len(combined))
+			combined, err = strategy.UpdateData(ctx, r, combined)
+			if err != nil {
+				klog.Errorf("failed to update data: %v", err)
+				continue
+			}
+		}
+
+		cont, err := check(ctx, r, st, combined, *dryRunFlag, counter)
 		if err != nil {
-			klog.Errorf("live data failed: %v", err)
+			klog.Errorf("check failed: %v", err)
 			continue
 		}
 
-		ts, err := st.Trades(ctx, combined)
-		if err != nil {
-			klog.Errorf("trades failed: %v", err)
-			continue
+		if !cont {
+			klog.Infof("loop has completed with %d buys and %d sells", counter.TotalBuys, counter.TotalSales)
+			return
 		}
-
-		sales := 0
-		buys := 0
-		for _, t := range ts {
-			if t.Order.Side == roho.Buy {
-				buys++
-				if buys > *maxBuysPerPollFlag {
-					klog.Warningf(" -> BUY %s (ignoring, over max-buys-per-poll=%d): %+v", t.Symbol, *maxBuysPerPollFlag, t)
-					continue
-				}
-
-				totalBuys++
-				if totalBuys > *maxBuysFlag {
-					klog.Errorf("hit maximum buys (%d) - exiting", totalBuys)
-					return
-				}
-			}
-
-			if t.Order.Side == roho.Sell {
-				sales++
-
-				if sales > *maxSalesPerPollFlag {
-					klog.Warningf(" -> SELL %s (ignoring, over max-sales-per-poll=%d): %+v", t.Symbol, *maxSalesPerPollFlag, t)
-					continue
-				}
-
-				totalSales++
-				if totalSales > *maxSalesFlag {
-					klog.Errorf("hit maximum sales (%d) - exiting", totalSales)
-					return
-				}
-			}
-
-			if err := trade(ctx, r, t, *dryRunFlag); err != nil {
-				klog.Errorf("trade failed: %v", err)
-			}
-		}
-
-		klog.Infof("Sleeping for %s...", maxSleep)
-		time.Sleep(maxSleep)
 	}
+}
+
+func check(ctx context.Context, r *roho.Client, st strategy.Strategy, combined []*strategy.CombinedStock, dryRun bool, count *Counter) (bool, error) {
+	klog.Infof("Calculating trades for %d stocks ...", len(combined))
+	ts, err := st.Trades(ctx, combined)
+	if err != nil {
+		return true, fmt.Errorf("trades: %w", err)
+	}
+
+	if len(ts) == 0 {
+		return true, nil
+	}
+
+	if len(ts) > 0 {
+		klog.Infof("%d possible trades found ...", len(ts))
+	}
+
+	count.PollSales = 0
+	count.PollBuys = 0
+
+	for _, t := range ts {
+		if t.Order.Side == roho.Buy {
+			if count.PollBuys+1 > *maxBuysPerPollFlag {
+				klog.Warningf(" -> BUY %s (ignoring, over max-buys-per-poll=%d): %+v", t.Instrument.Symbol, *maxBuysPerPollFlag, t)
+				continue
+			}
+
+			if count.TotalBuys+1 > *maxBuysFlag {
+				return false, fmt.Errorf("hit maximum buys (%d)", *maxBuysFlag)
+			}
+
+			count.PollBuys++
+			count.TotalBuys++
+		}
+
+		if t.Order.Side == roho.Sell {
+			if count.PollSales+1 > *maxSalesPerPollFlag {
+				klog.Warningf(" -> SELL %s (ignoring, over max-sales-per-poll=%d): %+v", t.Instrument.Symbol, *maxSalesPerPollFlag, t)
+				continue
+			}
+
+			if count.TotalSales+1 > *maxSalesFlag {
+				return false, fmt.Errorf("hit maximum sales (%d)", *maxSalesFlag)
+			}
+		}
+
+		if err := trade(ctx, r, t, dryRun); err != nil {
+			return true, fmt.Errorf("trade failed: %w", err)
+		}
+	}
+
+	return true, nil
 }
