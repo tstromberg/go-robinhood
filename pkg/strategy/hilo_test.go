@@ -2,6 +2,7 @@ package strategy
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -63,5 +64,23 @@ func TestHiLo(t *testing.T) {
 
 	if diff := cmp.Diff(want, got); diff != "" {
 		t.Errorf("unexpected trade diff: %s", diff)
+	}
+}
+
+func TestPercentDiff(t *testing.T) {
+	tests := []struct {
+		a    float64
+		b    float64
+		want float64
+	}{
+		{100, 80, -20},
+		{4, 5, 25},
+	}
+
+	for _, tc := range tests {
+		got := percentDiff(tc.a, tc.b)
+		if fmt.Sprintf("%.3f", got) != fmt.Sprintf("%.3f", tc.want) {
+			t.Errorf("percentDiff(%v, %v) = %.3f, want %.3f", tc.a, tc.b, got, tc.want)
+		}
 	}
 }

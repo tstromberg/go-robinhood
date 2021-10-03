@@ -118,7 +118,7 @@ func loop(ctx context.Context, r *roho.Client, st strategy.Strategy, syms []stri
 		if counter.Polls > 1 {
 			klog.Infof("%d buys, %d sells. Sleeping for %s...", counter.TotalBuys, counter.TotalSales, maxSleep)
 			time.Sleep(maxSleep)
-			klog.Infof("Updating data for %s symbols ...", len(combined))
+			klog.Infof("Updating data for %d symbols ...", len(combined))
 			combined, err = strategy.UpdateData(ctx, r, combined)
 			if err != nil {
 				klog.Errorf("failed to update data: %v", err)

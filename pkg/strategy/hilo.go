@@ -25,8 +25,7 @@ func (cr *HiLoStrategy) Trades(_ context.Context, cs []*CombinedStock) ([]Trade,
 
 		// Buy stock only if we do not yet own it
 		if p == nil {
-			ratio := s.Fundamentals.Low52Weeks / s.Quote.AskPrice
-			perc := 100 - (ratio * 100)
+			perc := percentDiff(s.Fundamentals.Low52Weeks, s.Quote.AskPrice)
 			if perc < 2 {
 				klog.Infof("%s: ask price of %.2f is %.2f%% away from 52-week low of %.2f", s.Instrument.Symbol, s.Quote.AskPrice, perc, s.Fundamentals.Low52Weeks)
 			}
@@ -46,8 +45,7 @@ func (cr *HiLoStrategy) Trades(_ context.Context, cs []*CombinedStock) ([]Trade,
 			continue
 		}
 
-		ratio := s.Quote.BidPrice / s.Fundamentals.High52Weeks
-		perc := 100 - (ratio * 100)
+		perc := percentDiff(s.Quote.BidPrice, s.Fundamentals.High52Weeks)
 
 		if perc < 2 {
 			klog.Infof("%s: bad price of %.2f is %.2f%% away from 52-week high of %.2f", s.Instrument.Symbol, s.Quote.BidPrice, perc, s.Fundamentals.High52Weeks)
@@ -75,4 +73,8 @@ func (cr *HiLoStrategy) Trades(_ context.Context, cs []*CombinedStock) ([]Trade,
 	}
 
 	return ts, nil
+}
+
+func percentDiff(old, n float64) float64 {
+	return ((n - old) / old) * 100
 }
