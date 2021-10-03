@@ -51,11 +51,11 @@ func main() {
 	}
 	log.Printf("SPY opening price was $%.2f (52 week high: $%.2f)", fs[0].Open, fs[0].High52Weeks)
 
-	hs, err := r.Historicals(ctx, "day", "week", sym)
+	hs, err := r.Historical(ctx, roho.TenMinute, roho.Day, sym)
 	if err != nil {
 		log.Fatalf("get historicals failed: %v", err)
 	}
-	for _, r := range hs[0].Records {
+	for _, r := range hs.Records {
 		log.Printf("  %s: opened at %.2f, closed at %.2f", r.BeginsAt, r.OpenPrice, r.ClosePrice)
 	}
 

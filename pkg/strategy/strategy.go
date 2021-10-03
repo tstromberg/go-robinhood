@@ -11,6 +11,7 @@ var (
 	LuckySevens = "lucky-sevens"
 	Random      = "random"
 	HiLo        = "hilo"
+	Bounce      = "bounce"
 	strategies  = []string{LuckySevens, Random, HiLo}
 )
 
@@ -51,6 +52,9 @@ func New(c Config) (Strategy, error) {
 		return l, nil
 	case HiLo:
 		l := &HiLoStrategy{c: c}
+		return l, nil
+	case Bounce:
+		l := &BounceStrategy{c: c}
 		return l, nil
 	default:
 		return nil, fmt.Errorf("no strategy named %q exists", c.Kind)

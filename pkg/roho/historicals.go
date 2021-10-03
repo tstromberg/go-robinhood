@@ -26,10 +26,36 @@ type HistoricalRecord struct {
 	Interpolated bool      `json:"interpolated"`
 }
 
-// Historicals returns historical data for the list of stocks provided.
-func (c *Client) Historicals(ctx context.Context, interval string, span string, stocks ...string) ([]Historical, error) {
-	url := fmt.Sprintf("%s?interval=%s&span=%s&symbols=%s", baseURL("quotes/historicals"), interval, span, strings.Join(stocks, ","))
+const (
+	// Valid interval values.
+	FiveMinute   = "5minute"
+	TenMinute    = "10minute"
+	ThirtyMinute = "30minute"
+	Hour         = "hour"
+
+	// Valid for both intervals and spans.
+	Day  = "day"
+	Week = "week"
+
+	// Valid span values.
+	Month    = "month"
+	Year     = "year"
+	FiveYear = "5year"
+)
+
+// Historicals returns historical data for the list of stocks provided. See the interval/span constants for hints.
+func (c *Client) Historicals(ctx context.Context, interval string, span string, symbols []string) ([]Historical, error) {
+	url := fmt.Sprintf("%s?interval=%s&span=%s&symbols=%s", baseURL("quotes/historicals"), interval, span, strings.Join(symbols, ","))
 	var r struct{ Results []Historical }
 	err := c.get(ctx, url, &r)
 	return r.Results, err
+}
+
+// Historicals returns historical data for the list of stocks provided. See the interval/span constants for hints.
+func (c *Client) Historical(ctx context.Context, interval string, span string, symbol string) (Historical, error) {
+	hs, err := c.Historicals(ctx, interval, span, []string{symbol})
+	if err != nil {
+		return Historical{}, err
+	}
+	return hs[0], nil
 }
