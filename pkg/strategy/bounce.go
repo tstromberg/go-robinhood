@@ -8,7 +8,7 @@ import (
 	"k8s.io/klog/v2"
 )
 
-// BounceStrategy is a demonstration strategy to buy/sell stocks when near their 52-week hi/low averages.
+// BounceStrategy is a demonstration strategy to buy/sell stocks when they change direction near their 52-week hi/low
 type BounceStrategy struct {
 	c Config
 }
