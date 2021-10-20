@@ -21,8 +21,7 @@ import (
 var (
 	dryRunFlag          = flag.Bool("dry-run", false, "dry-run mode (don't buy/sell anything)")
 	strategyFlag        = flag.String("strategy", "", fmt.Sprintf("strategy to use. Choices: %v", strategy.List()))
-	minPollFlag         = flag.Duration("min-poll", 5*time.Second, "minimum time to poll (even if errors happen)")
-	maxPollFlag         = flag.Duration("max-poll", 60*time.Second, "maximum time to poll")
+	pollFlag            = flag.Duration("poll", 60*time.Second, "how often to poll")
 	maxBuysFlag         = flag.Int("max-buys", 5, "maximum buys before exiting")
 	maxBuysPerPollFlag  = flag.Int("max-buys-per-poll", 1, "maximum buys per polling period")
 	maxSalesFlag        = flag.Int("max-sales", 5, "maximum sales before exiting")
@@ -98,8 +97,6 @@ type Counter struct {
 
 func loop(ctx context.Context, r *roho.Client, st strategy.Strategy, syms []string) {
 	klog.Infof("%q loop has begun with %d symbols!", st, len(syms))
-
-	maxSleep := *maxPollFlag - *minPollFlag
 	counter := &Counter{}
 
 	klog.Infof("Gathering live data for %d symbols ...", len(syms))
@@ -116,8 +113,8 @@ func loop(ctx context.Context, r *roho.Client, st strategy.Strategy, syms []stri
 		counter.Polls++
 
 		if counter.Polls > 1 {
-			klog.Infof("%d buys, %d sells. Sleeping for %s...", counter.TotalBuys, counter.TotalSales, maxSleep)
-			time.Sleep(maxSleep)
+			klog.Infof("%d buys, %d sells. Sleeping for %s...", counter.TotalBuys, counter.TotalSales, pollFlag)
+			time.Sleep(*pollFlag)
 			klog.Infof("Updating data for %d symbols ...", len(combined))
 			combined, err = strategy.UpdateData(ctx, r, combined)
 			if err != nil {
