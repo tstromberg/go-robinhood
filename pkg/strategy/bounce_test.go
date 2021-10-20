@@ -42,6 +42,8 @@ func TestBounce(t *testing.T) {
 					{OpenPrice: 8.87, HighPrice: 8.87, LowPrice: 8.86, ClosePrice: 8.86},
 					{OpenPrice: 8.86, HighPrice: 8.86, LowPrice: 8.85, ClosePrice: 8.85},
 					{OpenPrice: 8.85, HighPrice: 8.85, LowPrice: 8.84, ClosePrice: 8.84},
+					{OpenPrice: 8.84, HighPrice: 8.84, LowPrice: 8.83, ClosePrice: 8.83},
+					{OpenPrice: 8.83, HighPrice: 8.83, LowPrice: 8.82, ClosePrice: 8.82},
 				},
 			},
 		},
@@ -94,6 +96,9 @@ func TestBounce(t *testing.T) {
 					{OpenPrice: 8.84, LowPrice: 8.84, HighPrice: 8.85, ClosePrice: 8.85},
 					{OpenPrice: 8.85, LowPrice: 8.85, HighPrice: 8.86, ClosePrice: 8.86},
 					{OpenPrice: 8.86, LowPrice: 8.86, HighPrice: 8.87, ClosePrice: 8.87},
+					{OpenPrice: 8.87, LowPrice: 8.87, HighPrice: 8.88, ClosePrice: 8.88},
+					{OpenPrice: 8.88, LowPrice: 8.88, HighPrice: 8.89, ClosePrice: 8.89},
+					{OpenPrice: 8.89, LowPrice: 8.89, HighPrice: 8.90, ClosePrice: 8.90},
 				},
 			},
 		},
@@ -110,8 +115,8 @@ func TestBounce(t *testing.T) {
 	}
 
 	want := []Trade{
-		{Instrument: &roho.Instrument{Symbol: "sell-downward-position"}, Order: roho.OrderOpts{Price: 8.84, Quantity: 2, Side: roho.Sell}, Reason: `0.5% away from 52-week high of 8.88, -0.34% bounce`},
-		{Instrument: &roho.Instrument{Symbol: "buy-upward-option"}, Order: roho.OrderOpts{Price: 8.94, Quantity: 1, Side: roho.Buy}, Reason: "0.7% away from 52wk low of 8.88, 1.13% bounce"},
+		{Instrument: &roho.Instrument{Symbol: "sell-downward-position"}, Order: roho.OrderOpts{Price: 8.84, Quantity: 2, Side: roho.Sell}, Reason: `0.5% away from 52-week high of 8.88, -0.11% bounce`},
+		{Instrument: &roho.Instrument{Symbol: "buy-upward-option"}, Order: roho.OrderOpts{Price: 8.94, Quantity: 1, Side: roho.Buy}, Reason: "0.7% away from 52wk low of 8.88, 0.79% bounce"},
 	}
 	got, err := s.Trades(context.Background(), cs)
 	if err != nil {

@@ -48,7 +48,7 @@ func (cr *HiLoStrategy) Trades(_ context.Context, cs []*CombinedStock) ([]Trade,
 		perc := percentDiff(s.Quote.BidPrice, s.Fundamentals.High52Weeks)
 
 		if perc < 2 {
-			klog.Infof("%s: bad price of %.2f is %.2f%% away from 52-week high of %.2f", s.Instrument.Symbol, s.Quote.BidPrice, perc, s.Fundamentals.High52Weeks)
+			klog.Infof("%s: bid price of %.2f is %.2f%% away from 52-week high of %.2f", s.Instrument.Symbol, s.Quote.BidPrice, perc, s.Fundamentals.High52Weeks)
 		}
 
 		if perc < 0 {
