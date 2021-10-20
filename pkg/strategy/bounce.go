@@ -3,6 +3,7 @@ package strategy
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/tstromberg/roho/pkg/roho"
 	"k8s.io/klog/v2"
@@ -55,8 +56,9 @@ func upward(fs []float64) (bool, float64) {
 }
 
 const (
-	minTrend       = 7
-	bounceNearness = 1.0
+	minTrend       = 8
+	bounceNearness = 1.2
+	tooFarOff      = -10
 )
 
 func downward(fs []float64) (bool, float64) {
@@ -91,6 +93,11 @@ func (cr *BounceStrategy) determineBuy(ctx context.Context, s *CombinedStock) *T
 	}
 
 	klog.Infof("%s: ask price of %.2f is %.2f%% away from 52-week low of %.2f", s.Instrument.Symbol, s.Quote.AskPrice, perc, s.Fundamentals.Low52Weeks)
+
+	if perc < tooFarOff {
+		klog.Warningf("%s: %.2f is far off of historical averages; something fishy is going on: %+v", s.Instrument.Symbol, s.Fundamentals)
+		return nil
+	}
 
 	var hs roho.Historical
 	var err error
@@ -136,16 +143,14 @@ func lastFloats(nums []float64, size int) []float64 {
 
 func (cr *BounceStrategy) determineSell(ctx context.Context, s *CombinedStock) *Trade {
 	p := s.Position
+	perc := percentDiff(s.Quote.BidPrice, s.Fundamentals.High52Weeks)
 
-	ratio := s.Quote.BidPrice / s.Fundamentals.High52Weeks
-	perc := 100 - (ratio * 100)
-
-	if perc < 2 {
+	if perc < (bounceNearness * 1.5) {
 		klog.Infof("%s: bid price of %.2f is %.2f%% away from 52-week high of %.2f", s.Instrument.Symbol, s.Quote.BidPrice, perc, s.Fundamentals.High52Weeks)
 	}
 
 	if perc < 0 {
-		klog.Warningf("%s sell perc=%.2f - bid price is above 52 weeks?", s.Instrument.Symbol, perc)
+		klog.Warningf("%s: %.2f is far off of historical averages; something fishy is going on: %+v", s.Instrument.Symbol, s.Fundamentals)
 		return nil
 	}
 
@@ -156,6 +161,11 @@ func (cr *BounceStrategy) determineSell(ctx context.Context, s *CombinedStock) *
 	if p.AverageBuyPrice > s.Quote.BidPrice {
 		klog.Infof("would sell %s for %.2f but we paid %.2f for it", s.Instrument.Symbol, s.Quote.BidPrice, p.AverageBuyPrice)
 		return nil
+	}
+
+	age := time.Since(p.CreatedAt)
+	if age < time.Hour*24*365 {
+		klog.Infof("would sell %s for %.2f but it's been held for less than a year (%s)", s.Instrument.Symbol, s.Quote.BidPrice, age)
 	}
 
 	var hs roho.Historical
