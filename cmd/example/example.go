@@ -37,6 +37,15 @@ func main() {
 		log.Printf("portfolio value: $%.2f buying power: $%.2f", p.Equity, p.WithdrawableAmount)
 	}
 
+	pos, err := r.Positions(ctx)
+	if err != nil {
+		log.Fatalf("positions: %v", err)
+	}
+
+	for _, p := range pos {
+		log.Printf("position: %+v", p)
+	}
+
 	sym := "SPY"
 	log.Printf("Looking up %s ...", sym)
 	i, err := r.Instrument(ctx, sym)
