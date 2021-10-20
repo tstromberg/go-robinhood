@@ -61,6 +61,7 @@ func Resolve(ctx context.Context, syms []string) ([]string, error) {
 	for _, s := range syms {
 		if !strings.HasPrefix(s, "^") {
 			rs = append(rs, s)
+			continue
 		}
 
 		switch s {
