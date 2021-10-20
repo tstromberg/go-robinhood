@@ -163,8 +163,7 @@ func (cr *BounceStrategy) determineSell(ctx context.Context, s *CombinedStock) *
 		return nil
 	}
 
-	age := time.Since(p.CreatedAt)
-	if age < time.Hour*24*365 {
+	if age := time.Since(p.CreatedAt); age < time.Hour*24*365 {
 		klog.Infof("would sell %s for %.2f but it's been held for less than a year (%s)", s.Instrument.Symbol, s.Quote.BidPrice, age)
 	}
 
